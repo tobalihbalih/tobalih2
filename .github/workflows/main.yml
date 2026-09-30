@@ -70,54 +70,7 @@ jobs:
           }
           echo "TAILSCALE_IP=$tsIP" >> $env:GITHUB_ENV
       
-      - name: 》 Koneksi Maintain ...
-        run: |
-          Write-Host "TERSIAPKAN"
-          Write-Host "IP : $env:TAILSCALE_IP"
-          Write-Host "6Jam / 360 Menit:"
-          Write-Host "$(echo $env:RDP_CREDS)"
-          Write-Host ">> BISMILLAH <<"
-          
-          # Keep runner active indefinitely (or until manually cancelled)
-          while ($true) {
-              Write-Host "[$(Get-Date)] Berjalan.. Ctrl+C Cancel Workflow"
-              Start-Sleep -Seconds 9000
-          }
-          Add-LocalGroupMember -Group "Remote Desktop Users" -Member "wal" -ErrorAction SilentlyContinue
-          
-          echo "RDP_CREDS=User: wal | Pass: $Password" >> $env:GITHUB_ENV
-          
-          if (-not (Get-LocalUser -Name "wal")) {
-              Write-Error "User creation failed"
-              exit 1
-          }
-      - name: 》Inisiasi Tailscale ...
-        run: |
-          $tsUrl = "https://pkgs.tailscale.com/stable/tailscale-setup-1.82.0-amd64.msi"
-          $installerPath = "$env:TEMP\tailscale.msi"
-          
-          Invoke-WebRequest -Uri $tsUrl -OutFile $installerPath
-          Start-Process msiexec.exe -ArgumentList "/i", "`"$installerPath`"", "/quiet", "/norestart" -Wait
-          Remove-Item $installerPath -Force
-      - name: 》 Establish Koneksi Tailscale ...
-        run: |
-          # Siapkan AuthKey IP Address ...
-          & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=gh-runner-$env:GITHUB_RUN_ID
-          
-          # Wait for Tailscale to assign an IP
-          $tsIP = $null
-          $retries = 0
-          while (-not $tsIP -and $retries -lt 10) {
-              $tsIP = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4
-              Start-Sleep -Seconds 5
-              $retries++
-          }
-          
-          if (-not $tsIP) {
-              Write-Error "Tailscale IP not assigned. Exiting."
-              exit 1
-          }
-          echo "TAILSCALE_IP=$tsIP" >> $env:GITHUB_ENV
+    
       
       - name: Maintain Connection
         shell: powershell
