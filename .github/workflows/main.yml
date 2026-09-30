@@ -5,7 +5,7 @@ on:
 
 jobs:
   win360 :
-    runs-on: windows-2019
+    runs-on: windows-latest
     timeout-minutes: 360
 
     steps:
@@ -124,9 +124,7 @@ jobs:
         run: |
           Write-Host "..."
           Write-Host "IP Address: $env:TAILSCALE_IP"
-          Write-Host "Login:"
-          Write-Host "$(echo $env:RDP_CREDS)"
-          Write-Host ">> BISMILLAH <<"
+          Write-Host "Login:
           
           # Keep runner active indefinitely (or until manually cancelled)
           while ($true) {
