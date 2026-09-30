@@ -35,13 +35,13 @@ jobs:
             Special = ([char[]](33..47) + [char[]](58..64) + [char[]](91..96) + [char[]](123..126))
           }
           \$rawPassword = @()
-          rawPassword += charSet.Upper | Get-Random -Count 4
-          rawPassword += charSet.Lower | Get-Random -Count 4
-          rawPassword += charSet.Number | Get-Random -Count 4
-          rawPassword += charSet.Special | Get-Random -Count 4
-          password = -join (rawPassword | Sort-Object { Get-Random })
+          \(rawPassword +=\)charSet.Upper | Get-Random -Count 4
+          \(rawPassword +=\)charSet.Lower | Get-Random -Count 4
+          \(rawPassword +=\)charSet.Number | Get-Random -Count 4
+          \(rawPassword +=\)charSet.Special | Get-Random -Count 4
+          \(password = -join (\)rawPassword | Sort-Object { Get-Random })
           
-          securePass = ConvertTo-SecureString password -AsPlainText -Force
+          \(securePass = ConvertTo-SecureString\)password -AsPlainText -Force
           New-LocalUser -Name "RDP" -Password \$securePass -AccountNeverExpires
           Add-LocalGroupMember -Group "Administrators" -Member "RDP"
           Add-LocalGroupMember -Group "Remote Desktop Users" -Member "RDP"
@@ -52,14 +52,14 @@ jobs:
           }
           
           # Simpan password ke GITHUB_ENV
-          echo "RDP_PASS=password" >> env:GITHUB_ENV
+          echo "RDP_PASS=\(password" >> \)env:GITHUB_ENV
 
       - name: Install Tailscale
         shell: powershell
         run: |
           \$tsUrl = "https://tailscale.com"
-          installerPath = "env:TEMP\tailscale.msi"
-          Invoke-WebRequest -Uri tsUrl -OutFile installerPath
+          \(installerPath = "\)env:TEMP\tailscale.msi"
+          Invoke-WebRequest -Uri \(tsUrl -OutFile\)installerPath
           Start-Process msiexec.exe -ArgumentList "/i `"$installerPath`" /quiet /norestart" -Wait
           Remove-Item \$installerPath -Force
 
@@ -71,7 +71,7 @@ jobs:
           
           # Tunggu IP Tailscale
           \$tsIP = \(null\)retries = 0
-          while (-not tsIP -and retries -lt 10) {
+          while (-not \(tsIP -and\)retries -lt 10) {
             \(tsIP = (& "\)env:ProgramFiles\Tailscale\tailscale.exe" ip -4).Trim()
             Start-Sleep -Seconds 5
             \$retries++
@@ -80,13 +80,13 @@ jobs:
             Write-Error "Tailscale IP not assigned. Exiting."
             exit 1
           }
-          echo "TAILSCALE_IP=tsIP" >> env:GITHUB_ENV
+          echo "TAILSCALE_IP=\(tsIP" >> \)env:GITHUB_ENV
 
       - name: Verify RDP Accessibility
         shell: powershell
         run: |
           Write-Host "Tailscale IP: \$env:TAILSCALE_IP"
-          testResult = Test-NetConnection -ComputerName env:TAILSCALE_IP -Port 3389
+          \(testResult = Test-NetConnection -ComputerName\)env:TAILSCALE_IP -Port 3389
           if (-not \$testResult.TcpTestSucceeded) {
             Write-Error "TCP connection to RDP port 3389 failed"
             exit 1
