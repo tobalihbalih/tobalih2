@@ -13,7 +13,6 @@ jobs:
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0 -Force
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0 -Force
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "SecurityLayer" -Value 0 -Force
-          
           netsh advfirewall firewall delete rule name="RDP-Tailscale"
           netsh advfirewall firewall add rule name="RDP-Tailscale" dir=in action=allow protocol=TCP localport=3389
           Restart-Service -Name TermService -Force
@@ -34,17 +33,14 @@ jobs:
           rawPassword += charSet.Number | Get-Random -Count 4
           rawPassword += charSet.Special | Get-Random -Count 4
           password = -join (rawPassword | Sort-Object { Get-Random })
-          
           securePass = ConvertTo-SecureString password -AsPlainText -Force
           New-LocalUser -Name "RDP" -Password \$securePass -AccountNeverExpires
           Add-LocalGroupMember -Group "Administrators" -Member "RDP"
           Add-LocalGroupMember -Group "Remote Desktop Users" -Member "RDP"
-          
           if (-not (Get-LocalUser -Name "RDP")) {
             Write-Error "User creation failed"
             exit 1
           }
-          
           echo "RDP_PASS=password" >> env:GITHUB_ENV
 
       - name: Install Tailscale
@@ -90,8 +86,7 @@ jobs:
           Write-Host "Username: RDP"
           Write-Host "Password: $env:RDP_PASS"
           Write-Host "==================`n"
-          
           while (\$true) {
-            Write-Host "[\$(Get-Date)] RDP Active - Use Ctrl+C or cancel workflow to terminate"
+            Write-Host "[\$(Get-Date)] RDP Active - Use cancel workflow to terminate"
             Start-Sleep -Seconds 300
           }
