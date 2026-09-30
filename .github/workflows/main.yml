@@ -5,7 +5,7 @@ on:
 jobs:
   secure-rdp:
     runs-on: windows-latest
-    timeout-minutes: 360  # Batasan maksimal GitHub Actions untuk runner gratis adalah 360 menit (6 jam)
+    timeout-minutes: 360  # Batasan maksimal GitHub Actions gratis adalah 360 menit (6 jam)
     steps:
       - name: Configure Core RDP Settings
         shell: powershell
@@ -51,7 +51,7 @@ jobs:
             exit 1
           }
           
-          # Simpan password ke GITHUB_ENV dan simpan terpisah agar mudah dipanggil
+          # Simpan password ke GITHUB_ENV
           echo "RDP_PASS=password" >> env:GITHUB_ENV
 
       - name: Install Tailscale
@@ -66,7 +66,7 @@ jobs:
       - name: Establish Tailscale Connection
         shell: powershell
         run: |
-          # Jalankan Tailscale
+          # Jalankan Tailscale menggunakan rahasia GitHub
           & "\$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=\({{ secrets.TAILSCALE_AUTH_KEY }} --hostname=gh-runner-\)env:GITHUB_RUN_ID
           
           # Tunggu IP Tailscale
